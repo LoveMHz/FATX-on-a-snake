@@ -5,8 +5,9 @@ import random
 from typing import List
 
 SUPERBLOCK_SIZE = 4096
-SECTOR_SIZE = 512
+SECTOR_SIZE = 4096
 DIRECTORY_SIZE = 64
+SECTORS_PER_CLUSTER = 4
 
 class SuperBlock():
 	"""
@@ -18,8 +19,8 @@ class SuperBlock():
 	14		4		Unknown (always 0?)
 	18		4078	Unused
 	"""
-	SUPERBLOCK_SIZE = 4096
-	SECTOR_SIZE = 512
+	#SUPERBLOCK_SIZE = 4096
+	#SECTOR_SIZE = 1024
 	SB_OFS_Name = 0
 	SB_SIZE_Name = 4
 	SB_OFS_VolumeId = 4
@@ -45,15 +46,15 @@ class SuperBlock():
 		self.clustersize = self.clusternum * SECTOR_SIZE
 		assert("FATX" == self.name)
 		assert(1 == self.fatcopies)
-		assert(32 == self.clusternum)
-		assert(16384 == self.clustersize)
+		assert(SECTORS_PER_CLUSTER == self.clusternum)
+		assert(SECTORS_PER_CLUSTER*SECTOR_SIZE == self.clustersize)
 
 	@classmethod
 	def new(cls):
 		self = cls.__new__(cls)
 		self.name = "FATX"
 		self.volume = random.randint(0,0xFFFFFFFF)
-		self.clusternum = 32
+		self.clusternum = SECTORS_PER_CLUSTER
 		self.clustersize = self.clusternum * SECTOR_SIZE
 		self.fatcopies = 1
 		return self

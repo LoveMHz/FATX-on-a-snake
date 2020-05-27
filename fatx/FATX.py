@@ -12,8 +12,9 @@ It should be the only place where data is read and written.
 READ_ONLY = True
 
 SUPERBLOCK_SIZE = 4096
-SECTOR_SIZE = 512
+SECTOR_SIZE = 4096
 DIRECTORY_SIZE = 64
+SECTORS_PER_CLUSTER = 4
 
 FATX16 = 2
 FATX32 = 4
@@ -51,7 +52,7 @@ class Filesystem():
 		self.f = open(file, 'w+b')
 
 		self.sb = SuperBlock.new()
-		self.fat_size = self._calc_fat_size(size, 32*512)
+		self.fat_size = self._calc_fat_size(size, SECTORS_PER_CLUSTER*SECTOR_SIZE)
 		self.fat = FAT.new(self.fat_size)
 		root_dl = DirectoryEntryList(b'\xFF'*64, 1)
 
@@ -165,7 +166,7 @@ class Filesystem():
 		return (ID-1) * self.sb.clustersize + SUPERBLOCK_SIZE + self.fat_size
 
 	@staticmethod
-	def _calc_fat_size(partition_size: int, cluster_size: int = 32*512):
+	def _calc_fat_size(partition_size: int, cluster_size: int = SECTORS_PER_CLUSTER*SECTOR_SIZE):
 		# ((partition size in bytes / cluster size) * cluster map entry size)
 		# rounded up to nearest 4096 byte boundary.
 		number_of_clusters = partition_size / cluster_size
